@@ -14,6 +14,7 @@ struct FluidProperties
 	double densityNonWetting;
 	double dynamicViscosityWetting;
 	double dynamicViscosityNonWetting;
+	double contactAngle;
 };
 
 class SingleCapillaryTube
