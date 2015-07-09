@@ -7,12 +7,20 @@
 #include "DynamicSingleTube.h"
 #include "ScantMethod.h"
 
+#define PI 3.14159265
+#define G 9.80
+
 SingleCapillaryTube::SingleCapillaryTube()
 {
 	loadTubeGeometry();
 	loadFluidProperties();
 	loadPressureValues();
 	loadPositionAndTime();
+}
+
+double calLocationInterface(const TubeGeometry &TG, const FluidProperties &FP)
+{
+	
 }
 
 void SingleCapillaryTube::loadTubeGeometry()
@@ -90,13 +98,62 @@ void SingleCapillaryTube::loadPositionAndTime()
 		system("pause");
 		exit(1);
 	}
-	pressureValuesFile >> leftPressure >> rightPressure;
+	pressureValuesFile >> initialLocation >> initialTime >> timeStep >> timeEndPoint;
 	pressureValuesFile.close();
+}
+
+double SingleCapillaryTube::calLocationFunctionWithAngle(const TubeGeometry &TG, \
+							const FluidProperties &FP, double tempLocation, \
+							double initialLocationValue)
+{
+	auto coefficientA = calCoefficientA(TG, FP);
+	auto coefficientB = calCoefficientB(TG, FP);
+	auto coefficientC = calCoefficientC(TG, FP);
+	auto coefficientD = calCoefficientD(TG, FP);
+	tempValue = coefficientA * (tempLocation - initialLocationValue) + \
+				(coefficientB - ())
 }
 
 double SingleCapillaryTube::calCoefficientA(const TubeGeometry &TG, const FluidProperties &FP)
 {
-	
+	double coefficientA; 
+	coefficientA = 8.0 * (FP.dynamicViscosityWetting - FP.dynamicViscosityNonWetting) / \
+				(TG.radius * TG.radius);
+	return coefficientA;
 }
 
-double SingleCapillaryTube::
+double SingleCapillaryTube::calCoefficientB(const TubeGeometry &TG, const FluidProperties &FP)
+{
+	double coefficientB;
+	coefficientB = 8.0 * (FP.dynamicViscosityNonWetting * TG.length) / \
+					pow(TG.radius, 2.);
+	return coefficientB;
+}
+
+double SingleCapillaryTube::calCoefficientC(const TubeGeometry &TG, const FluidProperties &FP)
+{
+	double coefficientC;
+	coefficientC = (FP.densityWetting - FP.densityNonWetting) * G * \
+					sin(TG.angleToHorizontal * PI / 180.);
+	return coefficientC;
+}
+
+double SingleCapillaryTube::calCoefficientD(const TubeGeometry &TG, const FluidProperties &FP)
+{
+	double coefficientD;
+	double tempCapillary;
+	tempCapillary = calCapillaryPressure(TG, FP);
+	coefficientD = FP.densityNonWetting * TG.length * G * \
+				sin(TG.angleToHorizontal * PI / 180.) + \
+				(rightPressure - leftPressure) - tempCapillary;
+	return coefficientD;
+}
+
+double SingleCapillaryTube::calCapillaryPressure(const TubeGeometry &TG, \
+							const FluidProperties &FP)
+{
+	//double capillaryPressure;
+	auto capillaryPressure = 2.0 * FP.surfaceTension * cos(FP.contactAngle * PI / \
+							180.) / TG.radius;
+	return capillaryPressure;
+}

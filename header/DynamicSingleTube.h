@@ -5,7 +5,7 @@ struct TubeGeometry
 {
 	double radius;
 	double length;
-	double angleToHorizontal
+	double angleToHorizontal;
 };
 
 struct FluidProperties
@@ -14,6 +14,7 @@ struct FluidProperties
 	double densityNonWetting;
 	double dynamicViscosityWetting;
 	double dynamicViscosityNonWetting;
+	double surfaceTension;
 	double contactAngle;
 };
 
