@@ -23,6 +23,8 @@ class SingleCapillaryTube
 private:
 	TubeGeometry Geometry;
 	FluidProperties Fluids;
+
+	const char *typeFunction;
 	
 	double leftPressure;
 	double rightPressure;
@@ -46,13 +48,14 @@ private:
 	double calCapillaryPressure(const TubeGeometry &TG, const FluidProperties &FP);
 	
 	double calLocationFunctionWithAngle(const TubeGeometry &TG, const FluidProperties &FP);
-	double calLocationFunctionwithoutAngle(const TubeGeometry &TG, const FluidProperties &FP);
-
+	double calLocationFunctionWithoutAngle(const TubeGeometry &TG, const FluidProperties &FP);
+	
+	double useScantMethod();
 public:
 	SingleCapillaryTube();
 	~SingleCapillaryTube() {}
-	double calLocationInterface(const TubeGeometry &TG, const FluidProperties &FP);
-	friend double useScantMethod();
-	friend double useFixedMethod();
+	double calLocationInterface();
+	//double useScantMethod();
+	//friend double useFixedMethod();
 };
 #endif 
