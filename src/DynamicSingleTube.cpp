@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "DynamicSingleTube.h"
-#include "ScantMethod.h"
+//#include "ScantMethod.h"
 
 #define PI 3.14159265
 #define G 9.80
@@ -98,8 +98,8 @@ void SingleCapillaryTube::loadPositionAndTime()
 		system("pause");
 		exit(1);
 	}
-	pressureValuesFile >> initialLocation >> initialTime >> timeStep >> timeEndPoint;
-	pressureValuesFile.close();
+	positionAndTimeFile >> initialLocation >> initialTime >> timeStep >> timeEndPoint >> typeFunction;
+	positionAndTimeFile.close();
 }
 
 double SingleCapillaryTube::calLocationInterface()
@@ -133,13 +133,28 @@ double SingleCapillaryTube::calLocationInterface()
 							tempL0, initialLocation, timePoint, initialTime);
 			valueForL1 = calLocationFunctionWithAngle(Geometry, Fluids,
 							tempL1, initialLocation, timePoint, initialTime);
-			interfaceLocation[i] = useScantMethod(tempL1, tempL0, valueForL1,
+			interfaceLocation[i] = useScantMethodWithAngle(tempL1, tempL0, valueForL1,
 												valueForL0, 1.0e-7,  timePoint);
 		}
 	}
 	else if (typeFunction == "noAngle")
 	{
-		
+		for (int i = 1; i < (numTimeSteps + 1); ++i)
+		{
+			timePoint += timeStep;
+			if (i > 1)
+			{
+				tempL0 = interfaceLocation[i - 1];
+				tempL1 = interfaceLocation[i - 1] + (interfaceLocation[i -1] - \
+						interfaceLocation[i - 2]) / 2.;	
+			}
+			valueForL0 = calLocationFunctionWithoutAngle(Geometry, Fluids, 
+							tempL0, initialLocation, timePoint, initialTime);
+			valueForL1 = calLocationFunctionWithoutAngle(Geometry, Fluids,
+							tempL1, initialLocation, timePoint, initialTime);
+			interfaceLocation[i] = useScantMethodWithoutAngle(tempL1, tempL0, valueForL1,
+												valueForL0, 1.0e-7,  timePoint);
+		}	
 	}
 }
 
@@ -147,7 +162,6 @@ double SingleCapillaryTube::calLocationFunctionWithAngle(const TubeGeometry &TG,
 							const FluidProperties &FP, double tempLocation, 
 							double initialLocationValue, double tempTime, 
 							const double initialTimePoint) 
-														)
 {
 	auto coefficientA = calCoefficientA(TG, FP);
 	auto coefficientB = calCoefficientB(TG, FP);
@@ -164,7 +178,7 @@ double SingleCapillaryTube::calLocationFunctionWithAngle(const TubeGeometry &TG,
 double SingleCapillaryTube::calLocationFunctionWithoutAngle(const TubeGeometry &TG,
 								const FluidProperties &FP, double tempLocation,
 								double initialLocationValue, double tempTime,
-								const double initalTimePoint)
+								const double initialTimePoint)
 {
 	auto coefficientB = calCoefficientB(TG, FP);
 	auto coefficientA = calCoefficientA(TG, FP);
@@ -220,9 +234,9 @@ double SingleCapillaryTube::calCapillaryPressure(const TubeGeometry &TG, \
 	return capillaryPressure;
 }
 
-double SingleCapillaryTube::useScantMethod(double x1, double x0, double f0, 
-										   double f1, const double specificErr,
-										   const t)
+double SingleCapillaryTube::useScantMethodWithAngle(double x1, double x0, double f1, 
+										   double f0, const double specificErr,
+										   double t)
 {
 	double tempL1, tempL0, tempL;
 	double valueForL0, valueForL1, valueL;
@@ -237,8 +251,31 @@ double SingleCapillaryTube::useScantMethod(double x1, double x0, double f0,
 							tempL, initialLocation, t, initialTime);
 		tempL0 = tempL1;
 		tempL1 = tempL;
-		valueL0 = ValueL1;
-		valueL1 = valueL;
+		valueForL0 = valueForL1;
+		valueForL1 = valueL;
+	}
+	return tempL1;
+}
+
+double SingleCapillaryTube::useScantMethodWithoutAngle(double x1, double x0, double f1, 
+										   double f0, const double specificErr,
+										   double t)
+{
+	double tempL1, tempL0, tempL;
+	double valueForL0, valueForL1, valueL;
+	tempL1 = x1;
+	tempL0 = x0;
+	valueForL0 = f0;
+	valueForL1 = f1;
+	while (fabs(tempL0 - tempL1) > specificErr)
+	{
+		tempL = tempL1 - valueForL1 * (tempL1 - tempL0) / (valueForL1 - valueForL0);
+		valueL = calLocationFunctionWithoutAngle(Geometry, Fluids,
+							tempL, initialLocation, t, initialTime);
+		tempL0 = tempL1;
+		tempL1 = tempL;
+		valueForL0 = valueForL1;
+		valueForL1 = valueL;
 	}
 	return tempL1;
 }

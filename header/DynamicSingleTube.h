@@ -1,6 +1,8 @@
 #ifndef DYNAMICSINGLETUBE_H_
 #define DYNAMICSINGLETUBE_H_
 
+#include <string>
+
 struct TubeGeometry
 {
 	double radius;
@@ -23,17 +25,17 @@ class SingleCapillaryTube
 private:
 	TubeGeometry Geometry;
 	FluidProperties Fluids;
-
-	const char *typeFunction;
 	
 	double leftPressure;
 	double rightPressure;
 	
-	double initalLocation;
+	double initialLocation;
 	double initialTime;
 	
 	double timeStep;
 	double timeEndPoint;
+
+	std::string typeFunction;
 	
 	void loadTubeGeometry();
 	void loadFluidProperties();
@@ -47,10 +49,17 @@ private:
 	
 	double calCapillaryPressure(const TubeGeometry &TG, const FluidProperties &FP);
 	
-	double calLocationFunctionWithAngle(const TubeGeometry &TG, const FluidProperties &FP);
-	double calLocationFunctionWithoutAngle(const TubeGeometry &TG, const FluidProperties &FP);
+	double calLocationFunctionWithAngle(const TubeGeometry &TG, const FluidProperties &FP,
+					double tempLocation, double initialLocation,
+					double tempTime, const double initialT);
+	double calLocationFunctionWithoutAngle(const TubeGeometry &TG, const FluidProperties &FP, 
+					double tempLocation, double initialLocation,
+					double tempTime, const double initialT);
 	
-	double useScantMethod();
+	double useScantMethodWithAngle(double x1, double x2, double f1, double f0, 
+					const double specificErr, double timePoint);
+	double useScantMethodWithoutAngle(double x1, double x2, double f1, double f0,
+					const double specificErr, double timePoint);
 public:
 	SingleCapillaryTube();
 	~SingleCapillaryTube() {}
