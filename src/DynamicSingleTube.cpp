@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <fstream>
 
 #include "DynamicSingleTube.h"
 //#include "ScantMethod.h"
@@ -102,7 +103,7 @@ void SingleCapillaryTube::loadPositionAndTime()
 	positionAndTimeFile.close();
 }
 
-double SingleCapillaryTube::calLocationInterface()
+void SingleCapillaryTube::calLocationInterface()
 {
 	long numTimeSteps;
 	numTimeSteps = long ((timeEndPoint - initialTime) / timeStep);
@@ -156,6 +157,7 @@ double SingleCapillaryTube::calLocationInterface()
 												valueForL0, 1.0e-7,  timePoint);
 		}	
 	}
+	outputInterfaceLocation(interfaceLocation);
 }
 
 double SingleCapillaryTube::calLocationFunctionWithAngle(const TubeGeometry &TG, 
@@ -278,4 +280,18 @@ double SingleCapillaryTube::useScantMethodWithoutAngle(double x1, double x0, dou
 		valueForL1 = valueL;
 	}
 	return tempL1;
+}
+
+void SingleCapillaryTube::outputInterfaceLocation(const double interfaceLocation [])
+{
+	using std::ofstream;
+	ofstream outputInterfaceLocationFile;
+	outputInterfaceLocationFile.open("location.dat");
+	int tempSize;
+	tempSize = sizeof(interfaceLocation) / sizeof(int);
+	for (int i = 0; i < tempSize; ++i)
+	{
+		outputInterfaceLocationFile << interfaceLocation[i] << std::endl;
+	}
+	outputInterfaceLocationFile.close();
 }

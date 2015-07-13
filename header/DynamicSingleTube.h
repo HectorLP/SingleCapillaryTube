@@ -60,10 +60,11 @@ private:
 					const double specificErr, double timePoint);
 	double useScantMethodWithoutAngle(double x1, double x2, double f1, double f0,
 					const double specificErr, double timePoint);
+	void outputInterfaceLocation(const double interfaceLocation []);
 public:
 	SingleCapillaryTube();
 	~SingleCapillaryTube() {}
-	double calLocationInterface();
+	void calLocationInterface();
 	//double useScantMethod();
 	//friend double useFixedMethod();
 };
