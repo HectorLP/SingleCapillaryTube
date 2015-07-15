@@ -2,6 +2,7 @@
 #define DYNAMICSINGLETUBE_H_
 
 #include <string>
+#include <vector>
 
 struct TubeGeometry
 {
@@ -60,12 +61,13 @@ private:
 					const double specificErr, double timePoint);
 	double useScantMethodWithoutAngle(double x1, double x2, double f1, double f0,
 					const double specificErr, double timePoint);
-	void outputInterfaceLocation(const double interfaceLocation []);
+	void outputInterfaceLocation(const std::vector<double> &interfaceLocation);
 public:
 	SingleCapillaryTube();
 	~SingleCapillaryTube() {}
-	void calLocationInterface();
-	//double useScantMethod();
+	void calLocationInterfaceScant();	//use Scant method to solve interface location
+	void calLocationInterfaceBrent();	//use Brent's method to solve interface location
+ 	//double useScantMethod();
 	//friend double useFixedMethod();
 };
 #endif 

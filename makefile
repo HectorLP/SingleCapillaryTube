@@ -6,7 +6,7 @@ LIBRARY_PATH = header/
 OBJS = main.o DynamicSingleTube.o
 
 InterfaceLocation: $(OBJS)
-	-${CLINKER} -std=c++11 -o ~/ComputationCplus/SingleTube/InterfaceLocation $(OBJS)
+	-${CLINKER} -std=c++11 -g -o ~/ComputationCplus/SingleTube/InterfaceLocation $(OBJS)
 	${RM} *.o
 	
 main.o: main.cpp
