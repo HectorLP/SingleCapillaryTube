@@ -29,12 +29,12 @@ void SingleCapillaryTube::loadTubeGeometry()
 	tubeGeometryFile.open("tubegeometry.dat");
 	while (!tubeGeometryFile.is_open())
 	{
-		std::cout << "Error happened when trying to open the file on tube" << 
+		std::cout << "Error happened when trying to open the file on tube" <<
 					"geometry.\n";
 		system("pause");
 		exit(1);
 	}
-	tubeGeometryFile >> Geometry.radius >> Geometry.length >> 
+	tubeGeometryFile >> Geometry.radius >> Geometry.length >>
 						Geometry.angleToHorizontal;
 	while (Geometry.radius <= 0 || Geometry.length <= 0 || \
 			Geometry.angleToHorizontal < 0)
@@ -110,9 +110,9 @@ void SingleCapillaryTube::calLocationInterfaceScant()
 	//interfaceLocation = new double [numTimeSteps + 1];
 	interfaceLocation.push_back(0.0);
 	double timePoint = 0.0;
-	
+
 	double tempValue0, tempValue1;
-	
+
 	double tempL0, tempL1, tempL;
 	tempL0 = interfaceLocation[0];
 	tempL1 = Geometry.length / 25.0;
@@ -129,7 +129,7 @@ void SingleCapillaryTube::calLocationInterfaceScant()
 				tempL1 = interfaceLocation[i - 1] + (interfaceLocation[i -1] - \
 						interfaceLocation[i - 2]) / 2.;
 			}
-			valueForL0 = calLocationFunctionWithAngle(Geometry, Fluids, 
+			valueForL0 = calLocationFunctionWithAngle(Geometry, Fluids,
 							tempL0, initialLocation, timePoint, initialTime);
 			valueForL1 = calLocationFunctionWithAngle(Geometry, Fluids,
 							tempL1, initialLocation, timePoint, initialTime);
@@ -150,9 +150,9 @@ void SingleCapillaryTube::calLocationInterfaceScant()
 			{
 				tempL0 = interfaceLocation[i - 1];
 				tempL1 = interfaceLocation[i - 1] + (interfaceLocation[i -1] - \
-						interfaceLocation[i - 2]) / 2.;	
+						interfaceLocation[i - 2]) / 2.;
 			}
-			valueForL0 = calLocationFunctionWithoutAngle(Geometry, Fluids, 
+			valueForL0 = calLocationFunctionWithoutAngle(Geometry, Fluids,
 							tempL0, initialLocation, timePoint, initialTime);
 			valueForL1 = calLocationFunctionWithoutAngle(Geometry, Fluids,
 							tempL1, initialLocation, timePoint, initialTime);
@@ -162,22 +162,27 @@ void SingleCapillaryTube::calLocationInterfaceScant()
 												valueForL0, 1.0e-7,  timePoint);
 			interfaceLocation.push_back(tempScant);
 			i += 1;
-		}	
+		}
 	}
 	outputInterfaceLocation(interfaceLocation);
 }
 
-void SingleCapillaryTube::calLocationInterfaceBren()
+void SingleCapillaryTube::calLocationInterfaceBrent()
 {
 	//TODO use boost::math::tools::brent_find_minima(F, min, max, iteration_times)\
 	to solve the interface location
-	//using namespace std::placeholder;
+	using namespace std::placeholder;
+	long numTimeSteps;
+	numTimeSteps = long ((timeEndPoint - initialTime) / timeStep);
+	interfaceLocation.push_back(0.0);
+	double timePoint = 0.0;
+
 }
 
-double SingleCapillaryTube::calLocationFunctionWithAngle(const TubeGeometry &TG, 
-							const FluidProperties &FP, double tempLocation, 
-							double initialLocationValue, double tempTime, 
-							const double initialTimePoint) 
+double SingleCapillaryTube::calLocationFunctionWithAngle(const TubeGeometry &TG,
+							const FluidProperties &FP, double tempLocation,
+							double initialLocationValue, double tempTime,
+							const double initialTimePoint)
 {
 	auto coefficientA = calCoefficientA(TG, FP);
 	auto coefficientB = calCoefficientB(TG, FP);
@@ -208,7 +213,7 @@ double SingleCapillaryTube::calLocationFunctionWithoutAngle(const TubeGeometry &
 
 double SingleCapillaryTube::calCoefficientA(const TubeGeometry &TG, const FluidProperties &FP)
 {
-	double coefficientA; 
+	double coefficientA;
 	coefficientA = 8.0 * (FP.dynamicViscosityWetting - FP.dynamicViscosityNonWetting) / \
 				(TG.radius * TG.radius);
 	return coefficientA;
@@ -250,7 +255,7 @@ double SingleCapillaryTube::calCapillaryPressure(const TubeGeometry &TG, \
 	return capillaryPressure;
 }
 
-double SingleCapillaryTube::useScantMethodWithAngle(double x1, double x0, double f1, 
+double SingleCapillaryTube::useScantMethodWithAngle(double x1, double x0, double f1,
 										   double f0, const double specificErr,
 										   double t)
 {
@@ -273,7 +278,7 @@ double SingleCapillaryTube::useScantMethodWithAngle(double x1, double x0, double
 	return tempL1;
 }
 
-double SingleCapillaryTube::useScantMethodWithoutAngle(double x1, double x0, double f1, 
+double SingleCapillaryTube::useScantMethodWithoutAngle(double x1, double x0, double f1,
 										   double f0, const double specificErr,
 										   double t)
 {
