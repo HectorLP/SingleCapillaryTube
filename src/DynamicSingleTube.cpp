@@ -6,9 +6,10 @@
 #include <sstream>
 #include <functional>
 
-#include <boost/math/tools/minima.hpp>
+#include <boost/math/tools/root.hpp>
 
 #include "DynamicSingleTube.h"
+#include "tolerance.h"
 //#include "ScantMethod.h"
 
 #define PI 3.14159265
@@ -169,14 +170,48 @@ void SingleCapillaryTube::calLocationInterfaceScant()
 
 void SingleCapillaryTube::calLocationInterfaceBrent()
 {
-	//TODO use boost::math::tools::brent_find_minima(F, min, max, iteration_times)\
+	//TODO use boost::math::tools::bisect(F, min, max, iteration_times)\
 	to solve the interface location
 	using namespace std::placeholder;
 	long numTimeSteps;
 	numTimeSteps = long ((timeEndPoint - initialTime) / timeStep);
+	tolerance Tol = 1.0e-7; 
 	interfaceLocation.push_back(0.0);
 	double timePoint = 0.0;
-
+	double timePoint = 0.0;
+	
+	double tempValue0, tempValue1;
+	
+	double tempL0, tempL1, tempL;
+	tempL0 = interfaceLocation[0];
+	tempL1 = Geometry.length / 25.0;
+	double valueForL0, valueForL1, valueL;
+	int i = 1;	
+	if (typeFunction == "havingAngle")
+	{
+		while (i < (numTimeSteps + 1) && fabs(temL) < Geometry.length)
+		{
+			timePoint += timeStep;
+			if (i > 1)
+			{
+				tempL0 = interfaceLocation[i];
+				tempL1 = interfaceLocation[i - 1] + (interfaceLocation[i -1] - \
+				interfaceLocation[i - 2]) / 2.;
+			}
+			typedef std::pair<double, double> resultEachStep;
+			resultEachStep tempR;
+			tempR = boost::math::tools::bisect(std::bind(calLocationFunctionWithoutAngle,\
+											Geometry, Fluids, _3, initialLocation, \
+											timePoint, initialTime), 0.0, \
+											-Geometry.length, Tol);
+			if (tempR.first == tempR.second)
+			{
+				tempL = tempR.first;
+			}
+			interfaceLocation.push_back(tempL);
+			i += 1;
+		}
+	}
 }
 
 double SingleCapillaryTube::calLocationFunctionWithAngle(const TubeGeometry &TG,
