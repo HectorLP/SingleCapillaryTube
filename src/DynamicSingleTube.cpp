@@ -168,6 +168,38 @@ void SingleCapillaryTube::calLocationInterfaceScant()
 	outputInterfaceLocation(interfaceLocation);
 }
 
+double SingleCapillaryTube::calLocationFunctionWithAngle(const TubeGeometry &TG,
+							const FluidProperties &FP, double tempLocation,
+							double initialLocationValue, double tempTime,
+							const double initialTimePoint)
+{
+	auto coefficientA = calCoefficientA(TG, FP);
+	auto coefficientB = calCoefficientB(TG, FP);
+	auto coefficientC = calCoefficientC(TG, FP);
+	auto coefficientD = calCoefficientD(TG, FP);
+	auto tempValue = coefficientA * (tempLocation - initialLocationValue) + \
+				(coefficientB - (coefficientA * coefficientD / coefficientC)) * \
+				log(fabs(coefficientC * tempLocation + coefficientD)/ \
+					fabs(coefficientC * tempLocation + coefficientD)) + \
+					+ coefficientC * (tempTime - initialTimePoint);
+	return    tempValue;
+}
+
+double SingleCapillaryTube::calLocationFunctionWithoutAngle(const TubeGeometry &TG,
+								const FluidProperties &FP, double tempLocation,
+								double initialLocationValue, double tempTime,
+								const double initialTimePoint)
+{
+	auto coefficientB = calCoefficientB(TG, FP);
+	auto coefficientA = calCoefficientA(TG, FP);
+	auto coefficientD = calCoefficientD(TG, FP);
+	auto tempValue = -coefficientB * (tempLocation - initialLocationValue) - \
+					1./2. * coefficientA * (pow(tempLocation, 2.) - \
+					pow(initialLocationValue, 2.)) - coefficientD * \
+					(tempTime - initialTimePoint);
+	return tempValue;
+}
+
 void SingleCapillaryTube::calLocationInterfaceBisect()
 {
 	//TODO use boost::math::tools::bisect(F, min, max, iteration_times)\
@@ -214,7 +246,7 @@ void SingleCapillaryTube::calLocationInterfaceBisect()
 	}
 	else if (typeFunction == "noAngle")
 	{
-		while (i < (numTimesSteps + 1) && fabs(tempL) < Geometry.length)
+		while (i < (numTimeSteps + 1) && fabs(tempL) < Geometry.length)
 		{
 			timePoint += timeStep;
 			if (i > 1)
@@ -239,37 +271,7 @@ void SingleCapillaryTube::calLocationInterfaceBisect()
 	outputInterfaceLocation(interfaceLocation);
 }
 
-double SingleCapillaryTube::calLocationFunctionWithAngle(const TubeGeometry &TG,
-							const FluidProperties &FP, double tempLocation,
-							double initialLocationValue, double tempTime,
-							const double initialTimePoint)
-{
-	auto coefficientA = calCoefficientA(TG, FP);
-	auto coefficientB = calCoefficientB(TG, FP);
-	auto coefficientC = calCoefficientC(TG, FP);
-	auto coefficientD = calCoefficientD(TG, FP);
-	auto tempValue = coefficientA * (tempLocation - initialLocationValue) + \
-				(coefficientB - (coefficientA * coefficientD / coefficientC)) * \
-				log(fabs(coefficientC * tempLocation + coefficientD)/ \
-					fabs(coefficientC * tempLocation + coefficientD)) + \
-					+ coefficientC * (tempTime - initialTimePoint);
-	return    tempValue;
-}
 
-double SingleCapillaryTube::calLocationFunctionWithoutAngle(const TubeGeometry &TG,
-								const FluidProperties &FP, double tempLocation,
-								double initialLocationValue, double tempTime,
-								const double initialTimePoint)
-{
-	auto coefficientB = calCoefficientB(TG, FP);
-	auto coefficientA = calCoefficientA(TG, FP);
-	auto coefficientD = calCoefficientD(TG, FP);
-	auto tempValue = -coefficientB * (tempLocation - initialLocationValue) - \
-					1./2. * coefficientA * (pow(tempLocation, 2.) - \
-					pow(initialLocationValue, 2.)) - coefficientD * \
-					(tempTime - initialTimePoint);
-	return tempValue;
-}
 
 double SingleCapillaryTube::calCoefficientA(const TubeGeometry &TG, const FluidProperties &FP)
 {
