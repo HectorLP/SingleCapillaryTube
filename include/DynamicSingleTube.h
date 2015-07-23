@@ -67,7 +67,8 @@ public:
 	SingleCapillaryTube();
 	~SingleCapillaryTube() {}
 	void calLocationInterfaceScant();	//use Scant method to solve interface location
-	void calLocationInterfaceBrent();	//use Brent's method to solve interface location
+	void calLocationInterfaceBisect();	//use bisect method from boost library.
+	void calLocationInterfaceBrent();	
  	//double useScantMethod();
 	//friend double useFixedMethod();
 };

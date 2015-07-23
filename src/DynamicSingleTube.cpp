@@ -168,7 +168,7 @@ void SingleCapillaryTube::calLocationInterfaceScant()
 	outputInterfaceLocation(interfaceLocation);
 }
 
-void SingleCapillaryTube::calLocationInterfaceBrent()
+void SingleCapillaryTube::calLocationInterfaceBisect()
 {
 	//TODO use boost::math::tools::bisect(F, min, max, iteration_times)\
 	to solve the interface location
@@ -189,7 +189,7 @@ void SingleCapillaryTube::calLocationInterfaceBrent()
 	int i = 1;	
 	if (typeFunction == "havingAngle")
 	{
-		while (i < (numTimeSteps + 1) && fabs(temL) < Geometry.length)
+		while (i < (numTimeSteps + 1) && fabs(tempL) < Geometry.length)
 		{
 			timePoint += timeStep;
 			if (i > 1)
@@ -210,6 +210,13 @@ void SingleCapillaryTube::calLocationInterfaceBrent()
 			}
 			interfaceLocation.push_back(tempL);
 			i += 1;
+		}
+	}
+	else if (typeFunction == "noAngle")
+	{
+		while (i < (numTimesSteps + 1) && fabs(temL) < Geometry.length)
+		{
+			
 		}
 	}
 }
