@@ -6,10 +6,10 @@
 #include <sstream>
 #include <functional>
 
-#include <boost/math/tools/root.hpp>
+#include <boost/math/tools/roots.hpp>
 
 #include "DynamicSingleTube.h"
-#include "tolerance.h"
+//#include "tolerance.h"
 //#include "ScantMethod.h"
 
 #define PI 3.14159265
@@ -172,16 +172,16 @@ void SingleCapillaryTube::calLocationInterfaceBisect()
 {
 	//TODO use boost::math::tools::bisect(F, min, max, iteration_times)\
 	to solve the interface location
-	using namespace std::placeholder;
+	using namespace std::placeholders;
+	std::vector<double> interfaceLocation;
 	long numTimeSteps;
 	numTimeSteps = long ((timeEndPoint - initialTime) / timeStep);
-	tolerance Tol = 1.0e-7; 
+	//tolerance Tol = 1.0e-7; 
 	interfaceLocation.push_back(0.0);
-	double timePoint = 0.0;
 	double timePoint = 0.0;
 	
 	double tempValue0, tempValue1;
-	
+	int Tol = 200;
 	double tempL0, tempL1, tempL;
 	tempL0 = interfaceLocation[0];
 	tempL1 = Geometry.length / 25.0;
@@ -199,14 +199,14 @@ void SingleCapillaryTube::calLocationInterfaceBisect()
 				interfaceLocation[i - 2]) / 2.;
 			}
 			typedef std::pair<double, double> resultEachStep;
-			resultEachStep tempR;
-			tempR = boost::math::tools::bisect(std::bind(calLocationFunctionWithoutAngle,\
+			resultEachStep stepResult;
+			stepResult = boost::math::tools::bisect(std::bind(calLocationFunctionWithAngle,\
 											Geometry, Fluids, _3, initialLocation, \
 											timePoint, initialTime), 0.0, \
 											-Geometry.length, Tol);
-			if (tempR.first == tempR.second)
+			if (stepResult.first == stepResult.second)
 			{
-				tempL = tempR.first;
+				tempL = stepResult.first;
 			}
 			interfaceLocation.push_back(tempL);
 			i += 1;
@@ -214,11 +214,29 @@ void SingleCapillaryTube::calLocationInterfaceBisect()
 	}
 	else if (typeFunction == "noAngle")
 	{
-		while (i < (numTimesSteps + 1) && fabs(temL) < Geometry.length)
+		while (i < (numTimesSteps + 1) && fabs(tempL) < Geometry.length)
 		{
-			
+			timePoint += timeStep;
+			if (i > 1)
+			{
+				tempL0 = interfaceLocation[i];
+				tempL1 = interfaceLocation[i - 1] + (interfaceLocation[i -1] - \
+				interfaceLocation[i - 2]) / 2.;
+			}
+			typedef std::pair<double, double> resultEachStep;
+			resultEachStep stepResult;
+			stepResult = boost::math::tools::bisect(std::bind(calLocationFunctionWithoutAngle,\
+						Geometry, Fluids, _3, initialLocation, timePoint, initialTime), \
+						0.0, -Geometry.length, Tol);
+			if (stepResult.first == stepResult.second)
+			{
+				tempL = stepResult.first;
+			}
+			interfaceLocation.push_back(tempL);
+			i += 1;
 		}
 	}
+	outputInterfaceLocation(interfaceLocation);
 }
 
 double SingleCapillaryTube::calLocationFunctionWithAngle(const TubeGeometry &TG,
