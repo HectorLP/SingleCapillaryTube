@@ -5,6 +5,7 @@
 #include <vector>
 #include <sstream>
 #include <functional>
+#include <utility>
 
 #include <boost/math/tools/roots.hpp>
 
@@ -232,8 +233,8 @@ void SingleCapillaryTube::calLocationInterfaceBisect()
 			}
 			typedef std::pair<double, double> resultEachStep;
 			resultEachStep stepResult;
-			stepResult = boost::math::tools::bisect(std::bind(calLocationFunctionWithAngle,\
-											Geometry, Fluids, _3, initialLocation, \
+			stepResult = boost::math::tools::bisect(std::bind(&SingleCapillaryTube::calLocationFunctionWithAngle,this,\
+											Geometry, Fluids, _1, initialLocation, \
 											timePoint, initialTime), 0.0, \
 											-Geometry.length, Tol);
 			if (stepResult.first == stepResult.second)
@@ -257,8 +258,8 @@ void SingleCapillaryTube::calLocationInterfaceBisect()
 			}
 			typedef std::pair<double, double> resultEachStep;
 			resultEachStep stepResult;
-			stepResult = boost::math::tools::bisect(std::bind(calLocationFunctionWithoutAngle,\
-						Geometry, Fluids, _3, initialLocation, timePoint, initialTime), \
+			stepResult = boost::math::tools::bisect(std::bind(&SingleCapillaryTube::calLocationFunctionWithoutAngle,this,\
+						Geometry, Fluids, _1, initialLocation, timePoint, initialTime), \
 						0.0, -Geometry.length, Tol);
 			if (stepResult.first == stepResult.second)
 			{
