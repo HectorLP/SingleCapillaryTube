@@ -10,6 +10,7 @@
 #include <boost/math/tools/roots.hpp>
 
 #include "DynamicSingleTube.h"
+#include "tolerance.h"
 //#include "tolerance.h"
 //#include "ScantMethod.h"
 
@@ -214,7 +215,7 @@ void SingleCapillaryTube::calLocationInterfaceBisect()
 	double timePoint = 0.0;
 	
 	double tempValue0, tempValue1;
-	int Tol = 200;
+	tolerance Tol = 1.0e-7;
 	double tempL0, tempL1, tempL;
 	tempL0 = interfaceLocation[0];
 	tempL1 = Geometry.length / 25.0;
