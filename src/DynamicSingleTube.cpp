@@ -8,6 +8,7 @@
 #include <utility>
 
 #include <boost/math/tools/roots.hpp>
+#include <boost/numeric/odeint.hpp>
 
 #include "DynamicSingleTube.h"
 #include "tolerance.h"
@@ -16,6 +17,8 @@
 
 #define PI 3.14159265
 #define G 9.80
+
+using namespace boost::numeric::odeint;
 
 SingleCapillaryTube::SingleCapillaryTube()
 {
@@ -175,10 +178,10 @@ double SingleCapillaryTube::calLocationFunctionWithAngle(const TubeGeometry &TG,
 							double initialLocationValue, double tempTime,
 							const double initialTimePoint)
 {
-	auto coefficientA = calCoefficientA(TG, FP);
-	auto coefficientB = calCoefficientB(TG, FP);
-	auto coefficientC = calCoefficientC(TG, FP);
-	auto coefficientD = calCoefficientD(TG, FP);
+	auto coefficientA = calCoefficientA();
+	auto coefficientB = calCoefficientB();
+	auto coefficientC = calCoefficientC();
+	auto coefficientD = calCoefficientD();
 	auto tempValue = coefficientA * (tempLocation - initialLocationValue) + \
 				(coefficientB - (coefficientA * coefficientD / coefficientC)) * \
 				log(fabs(coefficientC * tempLocation + coefficientD)/ \
@@ -192,9 +195,9 @@ double SingleCapillaryTube::calLocationFunctionWithoutAngle(const TubeGeometry &
 								double initialLocationValue, double tempTime,
 								const double initialTimePoint)
 {
-	auto coefficientB = calCoefficientB(TG, FP);
-	auto coefficientA = calCoefficientA(TG, FP);
-	auto coefficientD = calCoefficientD(TG, FP);
+	auto coefficientB = calCoefficientB();
+	auto coefficientA = calCoefficientA();
+	auto coefficientD = calCoefficientD();
 	auto tempValue = -coefficientB * (tempLocation - initialLocationValue) - \
 					1./2. * coefficientA * (pow(tempLocation, 2.) - \
 					pow(initialLocationValue, 2.)) - coefficientD * \
@@ -273,49 +276,99 @@ void SingleCapillaryTube::calLocationInterfaceBisect()
 	outputInterfaceLocation(interfaceLocation);
 }
 
+void SingleCapillaryTube::calThreeCoefficients()
+{
+	CoefficientB = calCoefficientB();
+	CoefficientA = calCoefficientA();
+	CoefficientD = calCoefficientD();
+	std::cout << "The coefficient value is " << CoefficientA << CoefficientB << CoefficientD << "\n";
+	std::cin.ignore();
+}
+
+void SingleCapillaryTube::calInterfaceLocationSolveOde()
+{
+	double finalLocation;
+	finalLocation = useOdeSolver();
+	std::cout << "The final position is " << finalLocation << std::endl;
+}
+
+void SingleCapillaryTube::rhsPart(const double location, double& dldt, const double t)
+{
+	calThreeCoefficients();
+	dldt = - (CoefficientD) / (CoefficientA * location + CoefficientB);
+}
 
 
-double SingleCapillaryTube::calCoefficientA(const TubeGeometry &TG, const FluidProperties &FP)
+
+inline void observeProcess(const double &x, const double t)
+{
+	std::cout << t << "\t" << x << std::endl;
+}
+
+double SingleCapillaryTube::useOdeSolver()
+{
+	typedef runge_kutta_dopri5<double, double, double, double, vector_space_algebra> stepperType;
+	namespace pl = std::placeholders;
+	double tempLocation;
+	tempLocation = initialLocation;
+	int numTimeSteps;
+	numTimeSteps = (timeEndPoint - initialTime) / timeStep;
+	std:: cout << "Time step is " << timeStep << std::endl;
+	std::cin.ignore();
+	double tempInitialTime = initialTime;
+	int tempStep = 0;
+	while (tempStep < numTimeSteps and fabs(tempLocation) < Geometry.length)
+	{
+		tempStep += 1;
+		double t1 = initialTime + tempStep * timeStep;
+		tempInitialTime += (tempStep - 1) * timeStep;
+		integrate_adaptive(make_controlled(1e-12, 1e-12, stepperType() ), std::bind(&SingleCapillaryTube::rhsPart,*this, pl::_1 , pl::_2 , pl::_3), \
+						tempLocation, tempInitialTime, t1, timeStep, observeProcess);
+	}
+	return tempLocation;
+}
+
+
+double SingleCapillaryTube::calCoefficientA()
 {
 	double coefficientA;
-	coefficientA = 8.0 * (FP.dynamicViscosityWetting - FP.dynamicViscosityNonWetting) / \
-				(TG.radius * TG.radius);
+	coefficientA = 8.0 * (Fluids.dynamicViscosityWetting - Fluids.dynamicViscosityNonWetting) / \
+				(Geometry.radius * Geometry.radius);
 	return coefficientA;
 }
 
-double SingleCapillaryTube::calCoefficientB(const TubeGeometry &TG, const FluidProperties &FP)
+double SingleCapillaryTube::calCoefficientB()
 {
 	double coefficientB;
-	coefficientB = 8.0 * (FP.dynamicViscosityNonWetting * TG.length) / \
-					pow(TG.radius, 2.);
+	coefficientB = 8.0 * (Fluids.dynamicViscosityNonWetting * Geometry.length) / \
+					pow(Geometry.radius, 2.);
 	return coefficientB;
 }
 
-double SingleCapillaryTube::calCoefficientC(const TubeGeometry &TG, const FluidProperties &FP)
+double SingleCapillaryTube::calCoefficientC()
 {
 	double coefficientC;
-	coefficientC = (FP.densityWetting - FP.densityNonWetting) * G * \
-					sin(TG.angleToHorizontal * PI / 180.);
+	coefficientC = (Fluids.densityWetting - Fluids.densityNonWetting) * G * \
+					sin(Geometry.angleToHorizontal * PI / 180.);
 	return coefficientC;
 }
 
-double SingleCapillaryTube::calCoefficientD(const TubeGeometry &TG, const FluidProperties &FP)
+double SingleCapillaryTube::calCoefficientD()
 {
 	double coefficientD;
 	double tempCapillary;
-	tempCapillary = calCapillaryPressure(TG, FP);
-	coefficientD = FP.densityNonWetting * TG.length * G * \
-				sin(TG.angleToHorizontal * PI / 180.) + \
+	tempCapillary = calCapillaryPressure();
+	coefficientD = Fluids.densityNonWetting * Geometry.length * G * \
+				sin(Geometry.angleToHorizontal * PI / 180.) + \
 				(rightPressure - leftPressure) - tempCapillary;
 	return coefficientD;
 }
 
-double SingleCapillaryTube::calCapillaryPressure(const TubeGeometry &TG, \
-							const FluidProperties &FP)
+double SingleCapillaryTube::calCapillaryPressure()
 {
 	//double capillaryPressure;
-	auto capillaryPressure = 2.0 * FP.surfaceTension * cos(FP.contactAngle * PI / \
-							180.) / TG.radius;
+	auto capillaryPressure = 2.0 * Fluids.surfaceTension * cos(Fluids.contactAngle * PI / \
+							180.) /Geometry.radius;
 	return capillaryPressure;
 }
 

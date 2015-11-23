@@ -10,7 +10,8 @@ int main()
 	std::cout << "Start to calculate the location of interface.\n";
 	SingleCapillaryTube singleTube;
 	//singleTube.calLocationInterfaceScant();
-	singleTube.calLocationInterfaceBisect();
+	//singleTube.calLocationInterfaceBisect();
+	singleTube.calInterfaceLocationSolveOde();
 	std::cout << "finish the calculation.\n";
 	return 0;
 }

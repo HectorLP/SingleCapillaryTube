@@ -35,6 +35,10 @@ private:
 	
 	double timeStep;
 	double timeEndPoint;
+	
+	double CoefficientA;
+	double CoefficientB;
+	double CoefficientD;
 
 	std::string typeFunction;
 	
@@ -43,12 +47,13 @@ private:
 	void loadPressureValues();
 	void loadPositionAndTime();
 	
-	double calCoefficientA(const TubeGeometry &TG, const FluidProperties &FP);
-	double calCoefficientB(const TubeGeometry &TG, const FluidProperties &FP);
-	double calCoefficientC(const TubeGeometry &TG, const FluidProperties &FP);
-	double calCoefficientD(const TubeGeometry &TG, const FluidProperties &FP);
+	double calCoefficientA();
+	double calCoefficientB();
+	double calCoefficientC();
+	double calCoefficientD();
+	void calThreeCoefficients();
 	
-	double calCapillaryPressure(const TubeGeometry &TG, const FluidProperties &FP);
+	double calCapillaryPressure();
 	
 	double calLocationFunctionWithAngle(const TubeGeometry &TG, const FluidProperties &FP,
 					double tempLocation, double initialLocation,
@@ -61,14 +66,16 @@ private:
 					const double specificErr, double timePoint);
 	double useScantMethodWithoutAngle(double x1, double x2, double f1, double f0,
 					const double specificErr, double timePoint);
-	
+	void rhsPart(const double location, double& dldt, const double t = 0.);
+	double useOdeSolver();
 	void outputInterfaceLocation(const std::vector<double> &interfaceLocation);
 public:
 	SingleCapillaryTube();
 	~SingleCapillaryTube() {}
 	void calLocationInterfaceScant();	//use Scant method to solve interface location
 	void calLocationInterfaceBisect();	//use bisect method from boost library.
-	void calLocationInterfaceBrent();	
+	void calLocationInterfaceBrent();
+	void calInterfaceLocationSolveOde();	//use the ode solver from boost library
  	//double useScantMethod();
 	//friend double useFixedMethod();
 };
