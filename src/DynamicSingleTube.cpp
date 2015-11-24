@@ -309,6 +309,7 @@ double SingleCapillaryTube::useOdeSolver()
 {
 	typedef runge_kutta_dopri5<double, double, double, double, vector_space_algebra> stepperType;
 	namespace pl = std::placeholders;
+	calThreeCoefficients();
 	double tempLocation;
 	tempLocation = initialLocation;
 	int numTimeSteps;
@@ -323,8 +324,9 @@ double SingleCapillaryTube::useOdeSolver()
 		double t1 = initialTime + tempStep * timeStep;
 		tempInitialTime += (tempStep - 1) * timeStep;
 		integrate_adaptive(make_controlled(1e-12, 1e-12, stepperType() ), std::bind(&SingleCapillaryTube::rhsPart,*this, pl::_1 , pl::_2 , pl::_3), \
-						tempLocation, tempInitialTime, t1, timeStep, observeProcess);
+						tempLocation, tempInitialTime, t1, timeStep / 2., observeProcess);
 	}
+	std::cout << "The total time step is " << tempStep << std::endl;
 	return tempLocation;
 }
 

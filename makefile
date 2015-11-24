@@ -10,7 +10,7 @@ InterfaceLocation: $(OBJS)
 	${RM} *.o
 	
 main.o: main.cpp
-	-${CLINKER} -std=c++11 -c -I$(LIBRARY_PATH) main.cpp
+	-${CLINKER} -std=c++11 -c -g -I$(LIBRARY_PATH) main.cpp
 	
 DynamicSingleTube.o: src/DynamicSingleTube.cpp
-	-${CLINKER} -std=c++11 -c -lboost_system -I$(LIBRARY_PATH) src/DynamicSingleTube.cpp
+	-${CLINKER} -std=c++11 -c -g -lboost_system -I$(LIBRARY_PATH) src/DynamicSingleTube.cpp
