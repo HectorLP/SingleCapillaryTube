@@ -294,7 +294,7 @@ void SingleCapillaryTube::calInterfaceLocationSolveOde()
 
 void SingleCapillaryTube::rhsPart(const double location, double& dldt, const double t)
 {
-	calThreeCoefficients();
+// 	calThreeCoefficients();
 	dldt = - (CoefficientD) / (CoefficientA * location + CoefficientB);
 }
 
@@ -322,7 +322,7 @@ double SingleCapillaryTube::useOdeSolver()
 	{
 		tempStep += 1;
 		double t1 = initialTime + tempStep * timeStep;
-		tempInitialTime += (tempStep - 1) * timeStep;
+		tempInitialTime = (tempStep - 1) * timeStep;
 		integrate_adaptive(make_controlled(1e-12, 1e-12, stepperType() ), std::bind(&SingleCapillaryTube::rhsPart,*this, pl::_1 , pl::_2 , pl::_3), \
 						tempLocation, tempInitialTime, t1, timeStep / 2., observeProcess);
 	}
